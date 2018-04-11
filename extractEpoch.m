@@ -15,7 +15,7 @@ function [] = extractEpoch()
 % Author: Emin Serin / Berlin School of Mind and Brain
 
 %% Load files. 
-disp('<<<<<Please load EEG ".set" file>>>>>')
+disp('<<<<<Please import EEG ".set" file>>>>>')
 [eegfile, eegpath] = uigetfile('.set','Please select .set file');
 EEG = pop_loadset(eegfile, eegpath);
 dataName = ['FPVS_',input('Subject number: ','s')];
@@ -37,6 +37,7 @@ occEEG = pop_select(occEEG,'channel',{'PO7' 'PO3' 'O1' 'Oz' 'POz' 'PO8' 'PO4' 'O
 %% Reject epochs with pink dot and false positive and create separate .set file for each condition
 
 % Ask behavioral data. 
+disp('<<<<<Please import logfile *.mat>>>>>')
 [behfile, behpath] = uigetfile('.mat','Please select .mat file');
 behData = load([behpath,behfile],'expInfo');
 behData = behData.expInfo;
@@ -91,6 +92,8 @@ for s = 1: length(condfields)
 end
 
 disp('<<<<<<<DONE.>>>>>>>')
+fprintf('<<<%d epochs are rejected.>',...
+    (length(tmpdata)-(length(cond.imp4Hz)+length(cond.exp4Hz))))
 
 end
 
