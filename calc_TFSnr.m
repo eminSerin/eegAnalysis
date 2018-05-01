@@ -166,8 +166,8 @@ for t = 1 : nfile
     ymax = ceil(max(mean(ft.swfft.powspctrm,1)));
     ylim([0 ymax+ymax/10]);
     set(gca,'YTick',(0:ymax/10:ymax))
-    xlabel('Freq(Hz)');
-    ylabel('PSD in mV2');
+    xlabel('Freq(Hz)','FontSize',10);
+    ylabel('Amplitude (mV^2)','FontSize',10);
     title('Power Spectrum Density (mean Occipital Channels)',...
         'FontSize', 8);
     
@@ -183,6 +183,8 @@ for t = 1 : nfile
     cfg.maskstyle = 'saturation';
     ft_singleplotTFR(cfg,ft.morlet)
     set(gca,'YTick',(cfg.foilim(1):2:cfg.foilim(2)))
+    ylabel('Hz', 'FontSize',10);
+    xlabel('Time', 'FontSize',10);
     
     % Plot SNR.
     subplot(2,2,2)
@@ -192,11 +194,10 @@ for t = 1 : nfile
     ymax = ceil(max(mean(snr.snr,1)));
     ylim([0.6 ymax+ymax/10])  ;
     set(gca,'YTick',(0.6:ymax/10:ymax))
-    xlabel('Freq(Hz)');
-    ylabel('SNR');
+    xlabel('Freq(Hz)', 'FontSize',10);
+    ylabel('SNR', 'FontSize',10);
     title('Signal to noise ratio (mean Occipital Channels)',...
-        'FontSize', 8);
-    
+        'FontSize', 10);
     fig.PaperPositionMode = 'manual';
     orient(fig,'landscape')
     print(fig,'-dpdf', [path outputfilename,'.pdf'])
