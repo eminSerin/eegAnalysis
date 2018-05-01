@@ -92,8 +92,11 @@ for s = 1: length(condfields)
 end
 
 disp('<<<<<<<DONE.>>>>>>>')
+fprintf('Trials \n impSelf: %d, \n impFam: %d \n expSelf: %d \n expFam: %d \n',...
+    length(cond.imp4Hzself),length(cond.imp4Hzfam),...
+    length(cond.exp4Hzself), length(cond.exp4Hzfam))
+
 fprintf('<<<%d epochs are rejected.>',...
     (length(tmpdata)-(length(cond.imp4Hz)+length(cond.exp4Hz))))
-
 end
 

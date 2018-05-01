@@ -53,9 +53,8 @@ eegplot(EEG.data, 'srate', EEG.srate, 'title', 'Scroll component activities -- e
     'limits', [EEG.xmin EEG.xmax]*1000, 'color', color,'eloc_file',EEG.chanlocs);
 
 % Ask for channels being rejected.
-defaultRej = [1,33]; % Default channels to be rejected. Fp1 and Fpz (broken).
-chaninterpolate = askNumList(['Enter number of channels you want to interpolate ',...
-    '(Fp1,Fpz in default):']);
+defaultRej = []; % Default channels to be rejected. Fp1 and Fpz (broken).
+chaninterpolate = askNumList(['Enter number of channels you want to interpolate:']);
 chaninterpolate = [defaultRej,chaninterpolate];
 
 % Interpolate selected regions.

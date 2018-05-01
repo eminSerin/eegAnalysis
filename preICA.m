@@ -1,11 +1,11 @@
 function [EEG] = preICA()
-%   PREICA performs preprocessing steps prior to ICA. 
-%   
+%   PREICA performs preprocessing steps prior to ICA.
+%
 %   Usage:
 %   [EEG] = preICA(); returns EEG structure that is ready for ICA.
 %
-%   Output: Saves FPVS_(subjecNumber)_preICA.set 
-%  
+%   Output: Saves FPVS_(subjecNumber)_preICA.set
+%
 %   Author: Emin Serin / Berlin School of Mind and Brain
 
 %% Load EEG files.
@@ -43,9 +43,8 @@ eegplot(EEG.data, 'srate', EEG.srate, 'title', 'Scroll component activities -- e
     'limits', [EEG.xmin EEG.xmax]*1000, 'color', color,'eloc_file',EEG.chanlocs);
 
 % Ask for channels being rejected.
-defaultRej = [1,33]; % Default channels to be rejected. Fp1 and Fpz (broken).
-chaninterpolate = askNumList(['Enter channels you want to interpolate ',...
-    '(Fp1,Fpz in default):']);
+defaultRej = []; % Default channels to be rejected. Fp1 and Fpz (broken).
+chaninterpolate = askNumList(['Enter channels you want to interpolate:']);
 chaninterpolate = [defaultRej,chaninterpolate];
 
 % Interpolate selected regions.
@@ -59,9 +58,19 @@ end
 % following link about why we need to use this function.
 % https://sccn.ucsd.edu/wiki/Makoto's_preprocessing_pipeline#Re-reference_the_data_to_average_.2811.2F29.2F2017_updated.29
 EEG = fullRankAveRef(EEG);
-% Save preICA dataset. 
+% Save preICA dataset.
 pop_saveset( EEG, 'filename', [dataName, '_preICA'], 'filepath', EEG.path);
 eeglab redraw; % open EEG lab.
+
+%% Nested functions
+    function numlist = askNumList(prompt)
+        % Ask and returns list of numbers.
+        numlist = input(prompt,'s');
+        numlist = arrayfun(@(i) str2double(i),strsplit(numlist,{' ',','}));
+        if isnan(numlist)
+            numlist = [];
+        end
+    end
 
 end
 
