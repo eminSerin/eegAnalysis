@@ -190,8 +190,8 @@ for t = 1 : nfile
     xlim([2 20])
     set(gca,'XTick',(2:1:20))
     ymax = ceil(max(mean(snr.snr,1)));
-    ylim([0 ymax+ymax/10])  ;
-    set(gca,'YTick',(0:ymax/10:ymax))
+    ylim([0.6 ymax+ymax/10])  ;
+    set(gca,'YTick',(0.6:ymax/10:ymax))
     xlabel('Freq(Hz)');
     ylabel('SNR');
     title('Signal to noise ratio (mean Occipital Channels)',...
