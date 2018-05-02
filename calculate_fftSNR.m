@@ -48,7 +48,7 @@ else
 end
 
 %% Import and convert eeg files.
-for t = 1 : length(nfile)
+for t = 1 : nfile
     if nfile ~= 1
         cfile = files{t};
     else
@@ -110,36 +110,36 @@ for t = 1 : length(nfile)
     fData.snr(:, end-noisebins:end,:) = NaN;
     
     %% SNR II
-%     fData.powerERP = mean(fData.power,3);
-%     
-%     if ndims(fData.powerERP) == 2
-%         fData.powerERP = permute(fData.powerERP, [3, 1, 2]);
-%     end
-%     fData.snrERP = zeros(size(fData.powerERP));
-%     for trial = 1:size(fData.powerERP, 1)
-%         for i = 1:numel(freqList)
-%             
-%             % current frequency
-%             cFreq = freqList(i);
-%             
-%             % calculate signal to noise
-%             stimband = freqList > cFreq-freqRes &...
-%                 freqList < cFreq+freqRes;
-%             noiseband = ~((freqList > cFreq-padbins*freqRes) &...
-%                 (freqList < cFreq+padbins*freqRes)) & ...
-%                 freqList > cFreq-noisebins*freqRes &...
-%                 freqList < cFreq+noisebins*freqRes;
-%             
-%             % Calculate SNR and store it in the structure
-%             fData.snrERP(trial, :, i) = mean(fData.powerERP(trial, :, stimband), 3)./...
-%                 mean(fData.powerERP(trial, :, noiseband), 3);
-%         end
-%     end
-%     
-%     fData.snrERP = squeeze(fData.snrERP);
-%     % Make the beginning and end NaNs because they don't have any neighbours
-%     fData.snrERP(:, 1:noisebins) = NaN;
-%     fData.snrERP(:, end-noisebins:end) = NaN;
+    %     fData.powerERP = mean(fData.power,3);
+    %
+    %     if ndims(fData.powerERP) == 2
+    %         fData.powerERP = permute(fData.powerERP, [3, 1, 2]);
+    %     end
+    %     fData.snrERP = zeros(size(fData.powerERP));
+    %     for trial = 1:size(fData.powerERP, 1)
+    %         for i = 1:numel(freqList)
+    %
+    %             % current frequency
+    %             cFreq = freqList(i);
+    %
+    %             % calculate signal to noise
+    %             stimband = freqList > cFreq-freqRes &...
+    %                 freqList < cFreq+freqRes;
+    %             noiseband = ~((freqList > cFreq-padbins*freqRes) &...
+    %                 (freqList < cFreq+padbins*freqRes)) & ...
+    %                 freqList > cFreq-noisebins*freqRes &...
+    %                 freqList < cFreq+noisebins*freqRes;
+    %
+    %             % Calculate SNR and store it in the structure
+    %             fData.snrERP(trial, :, i) = mean(fData.powerERP(trial, :, stimband), 3)./...
+    %                 mean(fData.powerERP(trial, :, noiseband), 3);
+    %         end
+    %     end
+    %
+    %     fData.snrERP = squeeze(fData.snrERP);
+    %     % Make the beginning and end NaNs because they don't have any neighbours
+    %     fData.snrERP(:, 1:noisebins) = NaN;
+    %     fData.snrERP(:, end-noisebins:end) = NaN;
     
     %% Plot Results.
     
@@ -150,9 +150,9 @@ for t = 1 : length(nfile)
     title(['Power Spectrum Density (mean Occipital channels)']);
     xlim([2 maxFreq])
     ymax = ceil(max(mean(mean(fData.power,3),1)));
-    ylim([0 ymax+ymax/10])
+    ylim([-0.2 ymax+ymax/10])
     set(gca,'XTick',(0:1:maxFreq))
-    set(gca,'YTick',(0:ymax/10:ymax))
+    set(gca,'YTick',(-0.2:ymax/10:ymax))
     xlabel('Freq (Hz)', 'FontSize',10);
     ylabel('Amplitude (mV^2)', 'FontSize',10);
     
@@ -162,9 +162,9 @@ for t = 1 : length(nfile)
     title(['Signal to noise ratio (mean Occipital channels)']);
     xlim([2 maxFreq])
     ymax = ceil(max(mean(mean(fData.snr,3),1)));
-    ylim([0.3 ymax+ymax/10])
+    ylim([0.2 ymax+ymax/10])
     set(gca,'XTick',(0:1:maxFreq))
-    set(gca,'YTick',(0.3:ymax/10:ymax))
+    set(gca,'YTick',(0.2:ymax/10:ymax))
     xlabel('Freq (Hz)', 'FontSize',10)
     ylabel('SNR', 'FontSize',10)
     
@@ -179,17 +179,17 @@ for t = 1 : length(nfile)
     % xlabel('Freq (Hz)')
     % ylabel('SNR')
     
-    % Plot Time-Frequency domain using Morlet Wavelets. 
+    % Plot Time-Frequency domain using Morlet Wavelets.
     subplot(2,2,[3 4])
     title(['Time Frequency Representation (Channels Averaged)'],'FontSize',...
         10);
     newtimef(mean(EEG.data,1),...
         EEG.pnts,[-2000 10998], EEG.srate,[7],...
-        'freqs',[2 20],'plotitc','off','erspmax', [1 4]); 
+        'freqs',[2 20],'plotitc','off','erspmax', [0 4]);
     
-    % Save pdf file. 
+    % Save pdf file.
     fig.PaperPositionMode = 'manual';
     orient(fig,'landscape')
-    print(fig,'-dpdf', [path outputfilename,'.pdf'])
+    print(fig,'-dpdf', [path outputfilename,'_eeglab','.pdf'])
 end
 end

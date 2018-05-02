@@ -105,7 +105,7 @@ for t = 1 : nfile
     cfg.method = 'wavelet'; % FFT method which uses tapers.
     cfg.output = 'pow'; % output as power.
     cfg.foilim = [2 20]; % frequency band of interest
-    cfg.width = 12; % Morlet window width.
+    cfg.width = 7; % Morlet window width.
     cfg.toi = -2:0.05:11.9;
     
     % Frequency analysis
@@ -116,7 +116,7 @@ for t = 1 : nfile
     % Set snr parameters
     snr.noisebins = 10; % neighboring bins.
     snr.padbins = 2; % number of closest neighbors.
-    snr.freqRes = 1/20; % frequency resolution.
+    snr.freqRes = 1/50; % frequency resolution.
     snr.data = ft.swfft;
     
     % Calculate SNR for all channels.
@@ -160,12 +160,12 @@ for t = 1 : nfile
     % Plot PSD.
     fig = figure;
     subplot(2,2,1);
-    plot(ft.swfft.freq,mean((ft.swfft.powspctrm.^2),1))
-    xlim([2 20])
-    set(gca,'XTick',(2:1:20))
+    plot(ft.swfft.freq,mean((ft.swfft.powspctrm),1))
+    xlim(cfg.foilim)
+    set(gca,'XTick',(cfg.foilim(1):1:cfg.foilim(2)))
     ymax = ceil(max(mean(ft.swfft.powspctrm,1)));
-    ylim([0 ymax+ymax/10]);
-    set(gca,'YTick',(0:ymax/10:ymax))
+    ylim([-0.2 ymax+ymax/10]);
+    set(gca,'YTick',(-0.2:ymax/10:ymax+ymax/10))
     xlabel('Freq(Hz)','FontSize',10);
     ylabel('Amplitude (mV^2)','FontSize',10);
     title('Power Spectrum Density (mean Occipital Channels)',...
@@ -177,7 +177,7 @@ for t = 1 : nfile
     cfg.title = 'Time-frequency in dB using Morlet Wavelets(mean Occipital Channels)';
     cfg.ylim = cfg.foilim;
     cfg.xlim = [0 10];
-    cfg.zlim = [1 4];
+    cfg.zlim = [0 4];
     cfg.interactive = 'no';
     cfg.baselinetype = 'db';
     cfg.maskstyle = 'saturation';
@@ -189,8 +189,8 @@ for t = 1 : nfile
     % Plot SNR.
     subplot(2,2,2)
     plot(snr.data.freq,mean(snr.snr,1))
-    xlim([2 20])
-    set(gca,'XTick',(2:1:20))
+    xlim(cfg.foilim)
+    set(gca,'XTick',(cfg.foilim(1):1:cfg.foilim(2)))
     ymax = ceil(max(mean(snr.snr,1)));
     ylim([0.2 ymax+ymax/10])  ;
     set(gca,'YTick',(0.2:ymax/10:ymax))
@@ -200,6 +200,6 @@ for t = 1 : nfile
         'FontSize', 10);
     fig.PaperPositionMode = 'manual';
     orient(fig,'landscape')
-    print(fig,'-dpdf', [path outputfilename,'.pdf'])
+    print(fig,'-dpdf', [path outputfilename,'_fieldtrip','.pdf'])
 end
 end
