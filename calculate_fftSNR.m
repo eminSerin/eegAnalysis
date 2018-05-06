@@ -46,7 +46,7 @@ if ischar(files)
 else
     nfile = length(files);
 end
-
+        
 %% Import and convert eeg files.
 for t = 1 : nfile
     if nfile ~= 1
@@ -54,7 +54,9 @@ for t = 1 : nfile
     else
         cfile = files;
     end
+     
     outputfilename = cfile(1:end-4);
+    ft(t).dataname = outputfilename;
     EEG = pop_loadset(cfile,path);
     % Choose occipital channels.
     EEG = pop_select( EEG,'channel',{'PO7' 'PO3' 'O1' 'Oz' 'POz' 'PO8' 'PO4' 'O2'});
@@ -72,20 +74,20 @@ for t = 1 : nfile
     %% FFT
     % Calculate power using fast fourier transformation and filter out data
     % with frequency above max frequency.
-    fData.power = zeros(datasize(1),length(freqList),datasize(3));
+    ft(t).power = zeros(datasize(1),length(freqList),datasize(3));
     for channel = 1: datasize(1)
         for trial = 1: datasize(3)
             % Normalized Power spectrum in microvolt squared.
             temp = abs(fft(EEG.data(channel,:,trial))/length(freq)).^2;
-            fData.power(channel,:,trial) = temp(freq <= maxFreq);
+            ft(t).power(channel,:,trial) = temp(freq <= maxFreq);
         end
     end
     
     clear temp; % Clear temp data.
     
     %% SNR
-    fData.snr = zeros(size(fData.power));
-    for trial = 1:size(fData.power, 3)
+    ft(t).snr = zeros(size(ft(t).power));
+    for trial = 1:size(ft(t).power, 3)
         for i = 1:numel(freqList)
             
             % current frequency
@@ -100,14 +102,14 @@ for t = 1 : nfile
                 freqList < cFreq+noisebins*freqRes;
             
             % Calculate SNR and store it in the structure
-            fData.snr(:, i, trial) = mean(fData.power(:, stimband, trial), 2)./...
-                mean(fData.power(:, noiseband, trial), 2);
+            ft(t).snr(:, i, trial) = mean(ft(t).power(:, stimband, trial), 2)./...
+                mean(ft(t).power(:, noiseband, trial), 2);
         end
     end
     
     % Make the beginning and end NaNs because they don't have any neighbours
-    fData.snr(:, 1:noisebins,:) = NaN;
-    fData.snr(:, end-noisebins:end,:) = NaN;
+    ft(t).snr(:, 1:noisebins,:) = NaN;
+    ft(t).snr(:, end-noisebins:end,:) = NaN;
     
     %% SNR II
     %     fData.powerERP = mean(fData.power,3);
@@ -146,10 +148,10 @@ for t = 1 : nfile
     % Plot Power
     fig = figure;
     subplot(2,2,1);
-    plot(freqList,mean(mean(fData.power,3),1));
+    plot(freqList,mean(mean(ft(t).power,3),1));
     title(['Power Spectrum Density (mean Occipital channels)']);
     xlim([2 maxFreq])
-    ymax = ceil(max(mean(mean(fData.power,3),1)));
+    ymax = ceil(max(mean(mean(ft(t).power,3),1)));
     ylim([-0.2 ymax+ymax/10])
     set(gca,'XTick',(0:1:maxFreq))
     set(gca,'YTick',(-0.2:ymax/10:ymax))
@@ -158,10 +160,10 @@ for t = 1 : nfile
     
     % Plot SNR
     subplot(2,2,2);
-    plot(freqList, mean(mean(fData.snr,3),1));
+    plot(freqList, mean(mean(ft(t).snr,3),1));
     title(['Signal to noise ratio (mean Occipital channels)']);
     xlim([2 maxFreq])
-    ymax = ceil(max(mean(mean(fData.snr,3),1)));
+    ymax = ceil(max(mean(mean(ft(t).snr,3),1)));
     ylim([0.2 ymax+ymax/10])
     set(gca,'XTick',(0:1:maxFreq))
     set(gca,'YTick',(0.2:ymax/10:ymax))
@@ -183,7 +185,9 @@ for t = 1 : nfile
     subplot(2,2,[3 4])
     title(['Time Frequency Representation (Channels Averaged)'],'FontSize',...
         10);
-    newtimef(mean(EEG.data,1),...
+    [ft(t).ft.ersp,ft(t).ft.itc,ft(t).ft.powbase,...
+        ft(t).ft.times,ft(t).ft.freqs,ft(t).ft.erspboot,...
+        ft(t).ft.itcboot] = newtimef(mean(EEG.data,1),...
         EEG.pnts,[-2000 10998], EEG.srate,[7],...
         'freqs',[2 20],'plotitc','off','erspmax', [0 4]);
     
@@ -192,4 +196,6 @@ for t = 1 : nfile
     orient(fig,'landscape')
     print(fig,'-dpdf', [path outputfilename,'_eeglab','.pdf'])
 end
+% Save processed time-frequency data structure. 
+save([path,'ave',outputfilename(end-10:end)],'ft','freqList');
 end

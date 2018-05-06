@@ -84,7 +84,7 @@ for t = 1 : nfile
     cfg.foilim = [2 20]; % frequency band of interest
     
     % Frequency analysis
-    ft.swfft = ft_freqanalysis(cfg,data);
+    ft(t).swfft = ft_freqanalysis(cfg,data);
     
     %% Convolution method. (time-frequency)
     
@@ -109,7 +109,7 @@ for t = 1 : nfile
     cfg.toi = -2:0.05:11.9;
     
     % Frequency analysis
-    ft.morlet = ft_freqanalysis(cfg,data);
+    ft(t).morlet = ft_freqanalysis(cfg,data);
     
     %% Signal-to-noise ratio analysis.
     
@@ -117,7 +117,7 @@ for t = 1 : nfile
     snr.noisebins = 10; % neighboring bins.
     snr.padbins = 2; % number of closest neighbors.
     snr.freqRes = 1/50; % frequency resolution.
-    snr.data = ft.swfft;
+    snr.data = ft(t).swfft;
     
     % Calculate SNR for all channels.
     if ndims(snr.data.powspctrm) == 2
@@ -141,20 +141,21 @@ for t = 1 : nfile
                 snr.data.freq  < cFreq + snr.noisebins * snr.freqRes;
             
             % Calculate SNR and store it in the structure
-            snr.snr(trial, :, i) = mean(snr.data.powspctrm(trial, :, stimband), 3)./...
+            ft(t).snr.snr(trial, :, i) = mean(snr.data.powspctrm(trial, :, stimband), 3)./...
                 mean(snr.data.powspctrm(trial, :, noiseband), 3);
         end
     end
     
     % Squeze 3D into 2D back.
-    snr.snr = squeeze(snr.snr);
+    ft(t).snr.snr = squeeze(ft(t).snr.snr);
     
     % Make the beginning and end NaNs because they don't have any
     % neighbours
-    snr.snr(:, 1 : snr.noisebins) = NaN;
-    snr.snr(:, end - snr.noisebins : end) = NaN;
+    ft(t).snr.snr(:, 1 : snr.noisebins) = NaN;
+    ft(t).snr.snr(:, end - snr.noisebins : end) = NaN;
     
-    
+    % Frequencies for snr. 
+    ft.snr.freq = snr.data.freq;
     %% Plot Data.
     
     % Plot PSD.
@@ -188,10 +189,10 @@ for t = 1 : nfile
     
     % Plot SNR.
     subplot(2,2,2)
-    plot(snr.data.freq,mean(snr.snr,1))
+    plot(snr.data.freq,mean(ft(t).snr.snr,1))
     xlim(cfg.foilim)
     set(gca,'XTick',(cfg.foilim(1):1:cfg.foilim(2)))
-    ymax = ceil(max(mean(snr.snr,1)));
+    ymax = ceil(max(mean(ft(t).snr.snr,1)));
     ylim([0.2 ymax+ymax/10])  ;
     set(gca,'YTick',(0.2:ymax/10:ymax))
     xlabel('Freq(Hz)', 'FontSize',10);
