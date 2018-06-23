@@ -11,13 +11,13 @@ function [] = calc_TFSnr()
 % Use as: calc_TFSnr()
 %
 % Function pops up a window which you can select epoched EEG ".set" file
-% you want to analyze (multiple file selection is also possible). 
+% you want to analyze (multiple file selection is also possible).
 %
 % Parameters:
 %
 % cfg.foilim = [1 20]; % Frequency of interest.
-% cfg.cfg.width = 12; % Window width used for Morlet Wavelets. 
-% 
+% cfg.cfg.width = 12; % Window width used for Morlet Wavelets.
+%
 % noisebins = 10; % Number of neighboring bins on each side of frequency of
 % interest. SNR for each frequency is calculated by dividing power of
 % frequency of interest by average of 10 bins on each side of the FOI
@@ -50,13 +50,15 @@ function [] = calc_TFSnr()
 [files, path] = uigetfile('.set','Please load .set eeg datafile',...
     'MultiSelect','on');
 
-if ischar(files) 
-    nfile = 1; 
+if ischar(files)
+    nfile = 1;
 else
-    nfile = length(files); 
+    nfile = length(files);
 end
 
-%% Import and convert eeg files. 
+dispPlot = 0; % plot
+
+%% Import and convert eeg files.
 for t = 1 : nfile
     if nfile ~= 1
         cfile = files{t};
@@ -64,7 +66,7 @@ for t = 1 : nfile
         cfile = files;
     end
     
-    outputfilename = cfile(1:end-4); % output file name. 
+    outputfilename = cfile(1:end-4); % output file name.
     % Load current data file.
     data = pop_loadset(cfile,path);
     
@@ -74,6 +76,7 @@ for t = 1 : nfile
     % Convert eeglab to fieldtrip data structure.
     data = eeglab2fieldtrip(data,'preprocessing');
     
+    
     %% Short-window fourier transform (frequency analysis).
     
     % set fieldtrip parameters.
@@ -81,7 +84,7 @@ for t = 1 : nfile
     cfg.output = 'pow'; % output as power.
     cfg.method = 'mtmfft'; % FFT method which uses tapers.
     cfg.taper = 'hanning'; % Hanning taper method (single taper).
-    cfg.foilim = [2 20]; % frequency band of interest
+    cfg.foilim = [0 25]; % frequency band of interest
     
     % Frequency analysis
     ft(t).swfft = ft_freqanalysis(cfg,data);
@@ -104,9 +107,10 @@ for t = 1 : nfile
     cfg = [];
     cfg.method = 'wavelet'; % FFT method which uses tapers.
     cfg.output = 'pow'; % output as power.
-    cfg.foilim = [2 20]; % frequency band of interest
+    cfg.foi = 0:25; % frequency band of interest
     cfg.width = 7; % Morlet window width.
-    cfg.toi = -2:0.05:11.9;
+%     cfg.toi = -2:0.05:10.9;
+    cfg.toi = 'all';
     
     % Frequency analysis
     ft(t).morlet = ft_freqanalysis(cfg,data);
@@ -154,53 +158,55 @@ for t = 1 : nfile
     ft(t).snr.snr(:, 1 : snr.noisebins) = NaN;
     ft(t).snr.snr(:, end - snr.noisebins : end) = NaN;
     
-    % Frequencies for snr. 
+    % Frequencies for snr.
     ft.snr.freq = snr.data.freq;
     %% Plot Data.
     
-    % Plot PSD.
-    fig = figure;
-    subplot(2,2,1);
-    plot(ft.swfft.freq,mean((ft.swfft.powspctrm),1))
-    xlim(cfg.foilim)
-    set(gca,'XTick',(cfg.foilim(1):1:cfg.foilim(2)))
-    ymax = ceil(max(mean(ft.swfft.powspctrm,1)));
-    ylim([-0.2 ymax+ymax/10]);
-    set(gca,'YTick',(-0.2:ymax/10:ymax+ymax/10))
-    xlabel('Freq(Hz)','FontSize',10);
-    ylabel('Amplitude (mV^2)','FontSize',10);
-    title('Power Spectrum Density (mean Occipital Channels)',...
-        'FontSize', 8);
-    
-    % Plot Time-frequency domain
-    subplot(2,2,[3 4])
-    cfg.baseline = [-2 0];
-    cfg.title = 'Time-frequency in dB using Morlet Wavelets(mean Occipital Channels)';
-    cfg.ylim = cfg.foilim;
-    cfg.xlim = [0 10];
-    cfg.zlim = [0 4];
-    cfg.interactive = 'no';
-    cfg.baselinetype = 'db';
-    cfg.maskstyle = 'saturation';
-    ft_singleplotTFR(cfg,ft.morlet)
-    set(gca,'YTick',(cfg.foilim(1):2:cfg.foilim(2)))
-    ylabel('Hz', 'FontSize',10);
-    xlabel('Time', 'FontSize',10);
-    
-    % Plot SNR.
-    subplot(2,2,2)
-    plot(snr.data.freq,mean(ft(t).snr.snr,1))
-    xlim(cfg.foilim)
-    set(gca,'XTick',(cfg.foilim(1):1:cfg.foilim(2)))
-    ymax = ceil(max(mean(ft(t).snr.snr,1)));
-    ylim([0.2 ymax+ymax/10])  ;
-    set(gca,'YTick',(0.2:ymax/10:ymax))
-    xlabel('Freq(Hz)', 'FontSize',10);
-    ylabel('SNR', 'FontSize',10);
-    title('Signal to noise ratio (mean Occipital Channels)',...
-        'FontSize', 10);
-    fig.PaperPositionMode = 'manual';
-    orient(fig,'landscape')
-    print(fig,'-dpdf', [path outputfilename,'_fieldtrip','.pdf'])
+    if dispPlot
+        % Plot PSD.
+        fig = figure;
+        subplot(2,2,1);
+        plot(ft.swfft.freq,mean((ft.swfft.powspctrm),1))
+        xlim(cfg.foilim)
+        set(gca,'XTick',(cfg.foilim(1):1:cfg.foilim(2)))
+        ymax = ceil(max(mean(ft.swfft.powspctrm,1)));
+        ylim([-0.2 ymax+ymax/10]);
+        set(gca,'YTick',(-0.2:ymax/10:ymax+ymax/10))
+        xlabel('Freq(Hz)','FontSize',10);
+        ylabel('Amplitude (mV^2)','FontSize',10);
+        title('Power Spectrum Density (mean Occipital Channels)',...
+            'FontSize', 8);
+        
+        % Plot Time-frequency domain
+        subplot(2,2,[3 4])
+        cfg.baseline = [-2 0];
+        cfg.title = 'Time-frequency in dB using Morlet Wavelets(mean Occipital Channels)';
+        cfg.ylim = cfg.foilim;
+        cfg.xlim = [0 10];
+        cfg.zlim = [0 4];
+        cfg.interactive = 'no';
+        cfg.baselinetype = 'db';
+        cfg.maskstyle = 'saturation';
+        ft_singleplotTFR(cfg,ft.morlet)
+        set(gca,'YTick',(cfg.foilim(1):2:cfg.foilim(2)))
+        ylabel('Hz', 'FontSize',10);
+        xlabel('Time', 'FontSize',10);
+        
+        % Plot SNR.
+        subplot(2,2,2)
+        plot(snr.data.freq,mean(ft(t).snr.snr,1))
+        xlim(cfg.foilim)
+        set(gca,'XTick',(cfg.foilim(1):1:cfg.foilim(2)))
+        ymax = ceil(max(mean(ft(t).snr.snr,1)));
+        ylim([0.2 ymax+ymax/10])  ;
+        set(gca,'YTick',(0.2:ymax/10:ymax))
+        xlabel('Freq(Hz)', 'FontSize',10);
+        ylabel('SNR', 'FontSize',10);
+        title('Signal to noise ratio (mean Occipital Channels)',...
+            'FontSize', 10);
+        fig.PaperPositionMode = 'manual';
+        orient(fig,'landscape')
+        print(fig,'-dpdf', [path outputfilename,'_fieldtrip','.pdf'])
+    end
 end
 end
