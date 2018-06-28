@@ -1,5 +1,5 @@
 function [TFdata,freqs] = waveletTransform(EEG,minF,maxF,varCycle,nCycle)
-%   WAVELETTRANSFROM performs time frequency analysis on EEG data using
+%   WAVELETTRANSFORM performs time frequency analysis on EEG data using
 %   Morlet wavelets. 
 %   
 %   It requires EEG structure that created by EEGLAB and returns time
