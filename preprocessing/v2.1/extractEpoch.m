@@ -1,18 +1,20 @@
 function [nTrials] = extractEpoch()
-% extractEpoch epochs given EEG datasets, rejects trials with pink dot
-% appears or false positive as well as trials with artifacts.
-% Following the artifact rejection, create separate datasets for each
-% condition (e.g. imp4Hzself, exp4Hzfam), and saves into input directory.
+%   extractEpoch segments data into conditions and save each conditions into 
+%   input directory (e.g. impS, expF).
 %
-% Usage:
-% extractEpoch()
+%   Input: 
+%       Please load (subID)_icaRej.set file (i.e. EEGLAB file after ICA component rejection). 
+%       This function assumes subjects' logfiles (subID.mat) and (subID_rejIndex.mat, index of rejected trials)  
+%           are in the same folder with eegfiles.
 %
-% Please use this function after ICA. Please enter subject number and load
-% EEGLAB .set file and log file (.mat file).
+%   Output:
+%       nTrials: A structure that includes number of trials in each condition. 
+%       Output file: (subjectNumber)_(condition).set
 %
-% Output file: FPVS_(subjectNumber)_(condition).set
+%    Usage:
+%       [nTrials] = extractEpoch();
 %
-% Author: Emin Serin / Berlin School of Mind and Brain
+%    Author: Emin Serin / Berlin School of Mind and Brain
 
 %% Load files.
 [files,eegpath] = uigetfile('*_icaRej.set','Please select ".set" files.'...
