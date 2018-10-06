@@ -10,7 +10,7 @@ Preprocessing steps:
 5. Reject epochs with artifact
 6. ICA and component rejection
 7. Reference to average
-8.Segmentation regarding each condition and R-waves.
+8. Segmentation regarding each condition and R-waves.
 
 Since the minimum frequency of 0.5Hz is recommended for sufficent ICA performance 
 (for detailed information; https://github.com/CSC-UW/csc-eeg-tools/wiki/Filtering-and-ICA), preprocessing v2.0 is recommended
