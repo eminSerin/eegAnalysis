@@ -141,7 +141,7 @@ for i = 1:nfile
             %% Step 8: ECG Preprocessing and Data Concat
             ECG = pop_eegfiltnew(ECG, 0.1); % 0.1 Hz highpass filter.
             ECG = pop_epoch( ECG, {  '111'  '112'  '113'  '121'  '122'  '123'  '211'  '212'  '213'  '221'  '222'  '223'  },...
-                [-2  11], 'newname', [cDataName,'_epochs'], 'epochinfo', 'yes'); % Epoching.
+                [-0.2  10], 'newname', [cDataName,'_epochs'], 'epochinfo', 'yes'); % Epoching.
             ECG = pop_select(ECG,'notrial',rejIndex); % Reject epochs.
             
             % Concatenate EEG and ECG datasets.
