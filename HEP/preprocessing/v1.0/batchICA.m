@@ -37,7 +37,7 @@ end
 % ICA loop.
 for i = 1: nfile
     if nfile ~= 1
-        cfile = files{t};
+        cfile = files{i};
     else
         cfile = files;
     end
