@@ -47,11 +47,19 @@ addParameter(p,'baseTimeWin',defaultVals.baseTimeWin,validationNumeric);
 parse(p,varargin{:});
 
 % Some parameters.
+data.times = p.Results.times;
 baseIdx = [find(p.Results.times == p.Results.baseTimeWin(1)):find(p.Results.times == p.Results.baseTimeWin(2))]; % Baseline index
 
-%% Load eeglab set file and process.
+%% Load eeglab mat file and process.
 [files, path] = uigetfile('.mat','Please load .mat eeg datafile',...
     'MultiSelect','on');
+
+% Read subject IDs. 
+exp = '\d';
+regexpf = @(c) regexp(c,exp);
+extnum = @(c) str2double(c(regexpf(c)));
+subID = unique(cellfun(extnum,files));
+data.subID = subID; 
 
 if ischar(files)
     % Check if a single file.
@@ -77,34 +85,36 @@ end
 
 % Load data and perform baseline correction.
 tic;
-for i = 1: nfiles
-    if nfiles ~= 1
-        cfile = files{i};
-    else
-        cfile = files;
+nf = 1; % nfile count
+for ns = 1:length(subID)
+    for i = 1: nfiles/length(subID)
+        if nfiles ~= 1
+            cfile = files{nf};
+        else
+            cfile = files;
+        end
+        
+        % Load data files.
+        ss = strsplit(cfile,{'_','.'});
+        ss = ss{2}; % condition name.
+        tmp = load([path cfile]);
+        fname = fieldnames(tmp);
+        tmp = tmp.(fname{:});
+        
+        if p.Results.ifBase
+            % baseline correction.
+            mBase = mean(tmp(:,baseIdx,:),2);
+            tmp = baseCorr(tmp,mBase);
+        end
+        data.(ss)(:,:,:,ns) = tmp;
+        nf = nf+1; 
     end
-    
-    % Load data files.
-    ss = strsplit(cfile,{'_','.'});
-    ss = ss{2}; % condition name.
-    tmp = load([path cfile]);
-    fname = fieldnames(tmp);
-    tmp = tmp.(fname{:});
-    
-    if p.Results.ifBase
-    % baseline correction.
-        mBase = mean(tmp(:,baseIdx,:),2);
-        tmp = baseCorr(tmp,mBase);
-    end
-    data.(ss)(:,:,:,i) = tmp;
-    
 end
-
 % Save matrix
 save(['subDataMat_',p.Results.baseMethod,'.mat'],'data','-v7.3');
 disp('Done!');
 
-toc;
+toc; 
 end
 
 
