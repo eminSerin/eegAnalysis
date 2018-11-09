@@ -4,30 +4,21 @@
 %
 %
 %
-%
+%   Emin Serin - Berlin School of Mind and Brain
 %
 %% Select directory where .mat files locates.
 path = uigetdir('Select eeg data directory');
 
 %% Set some parameters.
 conds = {'exp','imp'}; % conditions.
-ind = 'ind'; % ind or avg.
-pic = 0; % 1: save topoplots as png file, 0: save as pdf(vector based).
-subjects = [9 10 15 16 17 19 20 23 24 25 26 29 30 31 32]; % Subjects used.
+pic = 1; % 1: save topoplots as png file, 0: save as pdf(vector based).
+subjects = [9 10 15 16 19 20 21 22 23 24 25 26 30 31 32 37 38 39 40 41 42 43 44]; % Subjects used.
 cond = {'expF','expS','impF','impS'}; % conditions.
 varName = 'WA_data';
 baseIdx = [101:201]; % Baseline index -1000 to 0ms.
 times = linspace(-2000,10990,1300); % times.
 freqs = linspace(1,25,25); % freqs
 baseMethod = 'rel'; % 'abs': absolute ,'rel': relative,'db' :decibel
-elSelect = 'oz';
-
-% Ouput directory
-outputDir = [pwd filesep 'plots_&_datatables' filesep 'plots'...
-    filesep 'timeFrequency' filesep 'tf_' elSelect '_' baseMethod filesep];
-if ~exist(outputDir)
-    mkdir(outputDir)
-end
 
 % Reject subjects.
 % eSubject = [15 17 23 31 32]; % subjects to be excluded. 
@@ -38,6 +29,78 @@ for s = 1: length(subjects)
 end
 subList = logical(subList); 
 subjects = subjects(subList);
+
+%% Load files.
+for c = 1: length(cond)
+    cdir = dir([path, filesep,'*',cond{c},'.mat']);
+    for f = 1 : length(cdir)
+        tmpdat = load(cdir(f).name);
+        data.raw(f).(cond{c}) = tmpdat.(varName)(:,:,:);
+    end
+end
+data.raw = data.raw(subList);
+%% preTF Computation
+% Baseline correction.
+for c = 1: numel(cond)
+    for part = 1 : numel(subjects)
+        % baseline correction.
+        mBase = mean(data.raw(part).(cond{c})(:,baseIdx,:),2);
+        switch baseMethod
+            case 'db'
+                % Decibel baseline
+                for i = 1:size(data.raw(part).(cond{c}),2)
+                    data.ind(part).(cond{c})(:,i,:) = 10*log10(data.raw(part).(cond{c})(:,i,:)./mBase);
+                end
+            case 'rel'
+                for i = 1:size(data.raw(part).(cond{c}),2)
+                    % Relative relative baseline.
+                    data.ind(part).(cond{c})(:,i,:) = (data.raw(part).(cond{c})(:,i,:)./mBase)-1;
+                end
+            case 'abs'
+                for i = 1:size(data.raw(part).(cond{c}),2)
+                    % absolute baseline
+                    data.ind(part).(cond{c})(:,i,:) = (data.raw(part).(cond{c})(:,i,:) - mBase);
+                end
+        end
+        % Average per condition.
+        data.avg.(cond{c}) = mean(cat(4,data.ind.(cond{c})),4);
+    end
+end
+
+% Calculate grand mean and difference.
+for c = 1: numel(conds)
+    % Average.
+    % Calculate average grand mean and difference for each condition
+    data.avg.([conds{c},'GrandMean']) = (data.avg.([conds{c},'F'])...
+        +data.avg.([conds{c},'S']))./2;
+    data.avg.([conds{c},'Diff']) = data.avg.([conds{c},'S'])...
+        - data.avg.([conds{c},'F']);
+    for part = 1:numel(subjects)
+        % each participant
+        % Calculate grand mean and difference for each condition
+        data.ind(part).([conds{c},'GrandMean']) = (data.ind(part).([conds{c},'F'])...
+            +data.ind(part).([conds{c},'S']))./2;
+        data.ind(part).([conds{c},'Diff']) = data.ind(part).([conds{c},'S'])...
+            - data.ind(part).([conds{c},'F']);
+    end
+end
+
+ifSave = 1;
+if ifSave
+    % Save preprocessed data file. 
+    save(['timeFreqData_',baseMethod,'.mat'],'data','-v7.3');
+end
+%% More parameters. 
+% Channel Selection
+elSelect = 'oz';
+ind = 'avg'; % ind or avg.
+
+% Ouput directory
+outputDir = [pwd filesep 'plots_&_datatables' filesep 'plots'...
+    filesep 'timeFrequency' filesep 'tf_' elSelect '_' baseMethod filesep];
+if ~exist(outputDir)
+    mkdir(outputDir)
+end
 
 % Electrodes
 posterior = [20 21 22 23 24 25 26 27 28 29 30 31 57 58 59 60 61 62 63 64]; % occipital electrodes.
@@ -69,60 +132,6 @@ switch elSelect
         elTitle = '(P8)';
 end 
 
-
-%% Load files.
-for c = 1: length(cond)
-    cdir = dir([path, filesep,'*',cond{c},'.mat']);
-    for f = 1 : length(cdir)
-        tmpdat = load(cdir(f).name);
-        data.raw(f).(cond{c}) = tmpdat.(varName)(:,:,:);
-    end
-end
-data.raw = data.raw(subList);
-%% Baseline correction.
-for c = 1: numel(cond)
-    for part = 1 : numel(subjects)
-        % baseline correction.
-        mBase = mean(data.raw(part).(cond{c})(:,baseIdx,:),2);
-        switch baseMethod
-            case 'db'
-                % Decibel baseline
-                for i = 1:size(data.raw(part).(cond{c}),2)
-                    data.ind(part).(cond{c})(:,i,:) = 10*log10(data.raw(part).(cond{c})(:,i,:)./mBase);
-                end
-            case 'rel'
-                for i = 1:size(data.raw(part).(cond{c}),2)
-                    % Relative relative baseline.
-                    data.ind(part).(cond{c})(:,i,:) = (data.raw(part).(cond{c})(:,i,:)./mBase)-1;
-                end
-            case 'abs'
-                for i = 1:size(data.raw(part).(cond{c}),2)
-                    % absolute baseline
-                    data.ind(part).(cond{c})(:,i,:) = (data.raw(part).(cond{c})(:,i,:) - mBase);
-                end
-        end
-        % Average per condition.
-        data.avg.(cond{c}) = mean(cat(4,data.ind.(cond{c})),4);
-    end
-end
-%% Calculate grand mean and difference.
-for c = 1: numel(conds)
-    if strcmpi(ind,'avg')
-        % Calculate grand mean and difference for each condition
-        data.avg.([conds{c},'GrandMean']) = (data.avg.([conds{c},'F'])...
-            +data.avg.([conds{c},'S']))./2;
-        data.avg.([conds{c},'Diff']) = data.avg.([conds{c},'S'])...
-            - data.avg.([conds{c},'F']);
-    else
-        for part = 1:numel(subjects)
-            % Calculate grand mean and difference for each condition
-            data.ind(part).([conds{c},'GrandMean']) = (data.ind(part).([conds{c},'F'])...
-                +data.ind(part).([conds{c},'S']))./2;
-            data.ind(part).([conds{c},'Diff']) = data.ind(part).([conds{c},'S'])...
-                - data.ind(part).([conds{c},'F']);
-        end
-    end
-end
 %% Time Frequency representation
 if strcmpi(ind,'avg')
     for c = 1 : numel(conds)

@@ -1,7 +1,10 @@
 function [] = plot_powerSNR()
-%PLOT_POWERSNR plots power and signal to noise ratio. 
+%   PLOT_POWERSNR plots power and signal to noise ratio. 
 %   
-
+%
+%
+%   Emin Serin - Berlin School of Mind and Brain
+%
 
 %% Select directory.
 path = uigetdir();
@@ -10,7 +13,7 @@ path = uigetdir();
 ind = 'avg'; % ind or avg.
 mainEffect = 0; % plot for main effect of task and self identity.
 cond = {'expF','expS','impF','impS'};
-subjects = [9 10 15 16 17 19 20 23 24 25 26 29 30 31 32]; % Subjects used.
+subjects = [9 10 15 16 19 20 21 22 23 24 25 26 30 31 32 37 38 39 40 41 42 43 44]; % Subjects used.
 elSelect = 'anterior'; % Electrodes selected.
 
 % Reject subjects.

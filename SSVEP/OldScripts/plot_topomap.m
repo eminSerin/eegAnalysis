@@ -1,6 +1,12 @@
 function [] = plot_topomap()
-%PLOT_TOPOMAP Summary of this function goes here
-%   Detailed explanation goes here
+%   PLOT_TOPOMAP prepares topoplot of given data files. 
+%   
+%
+%
+%
+%
+%   Emin Serin - Berlin School of Mind and Brain
+%
 
 %% Importing and Descriptive Statistics
 clc;
@@ -13,10 +19,10 @@ clear;
 %%
 % Set some parameters. 
 pic = 1; % 1: save topoplots as png file, 0: save as pdf(vector based).
-ind = 'avg'; % ind or avg.
-subjects = [9 10 15 16 17 19 20 23 24 25 26 29 30 31 32]; % Subjects used.
+ind = 'ind'; % ind or avg.
+subjects = [9 10 15 16 19 20 21 22 23 24 25 26 30 31 32 37 38 39 40 41 42 43 44]; % Subjects used.
 times = linspace(-2000,10990,1300); % times.
-datTimeWin = [4000,5000]; % task Time Window
+datTimeWin = [3000,4000]; % task Time Window
 baseTimeWin = [-1000 0]; % baseline time window.
 baseIdx = [find(times == baseTimeWin(1)):find(times == baseTimeWin(2))]; % Baseline index
 datIdx = [find(times == datTimeWin(1)):find(times == datTimeWin(2))]; % Task index.
@@ -99,7 +105,7 @@ for c = 1:numel(cond)
                 topoplot(mean(data.([cond{c},plotType{p}]).baseCor(:,datIdx,part),2),...
                     EEG.chanlocs,'maplimits','maxmin','conv','off', 'headrad',0);
                 title(plotType{p});
-                caxis([0 2]);
+                caxis('auto');
                 cbar;
             end
 %             colormap('hot');
@@ -124,7 +130,7 @@ for c = 1:numel(cond)
             topoplot(mean(mean(data.([cond{c},plotType{p}]).baseCor(:,datIdx,:),2),3),...
                 EEG.chanlocs,'maplimits','maxmin','conv','on', 'headrad',0);
             title(plotType{p});
-            caxis([0 3]);
+            caxis('auto');
             cbar;
         end
 %         colormap('hot');

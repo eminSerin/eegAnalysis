@@ -1,13 +1,13 @@
 function [] = prepareBehData()
-%PREPAREBEHDATA creates data table for behavioral data.
-%   Detailed explanation goes here
+%   PREPAREBEHDATA creates data table for behavioral data.
 %
 %
 %
+%   Emin Serin - Berlin School of Mind and Brain
 %
 %% Load Data.
 % Subjects used.
-subjects = [9 10 15 16 17 19 20 23 24 25 26 29 30 31 32];
+subjects = [9 10 15 16 19 20 21 22 23 24 25 26 30 31 32 37 38 39 40 41 42 43 44]; % Subjects used.
 
 % Load eeglab set file.
 [files, path] = uigetfile('.mat','Please load .set eeg datafile',...
@@ -28,7 +28,7 @@ for f = 1:nfile
     
     % participant number.
     pID = strsplit(cfile, '_');
-    pID = pID{2};
+    pID = pID{3};
     
     if any(subjects==str2double(pID))
         % load data file.

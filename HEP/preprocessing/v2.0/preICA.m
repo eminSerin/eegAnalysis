@@ -128,7 +128,8 @@ for i = 1:nfile
             epochRejmV = 500; % maximum microvolt value.
             fprintf('<<<<Epoch Rejection Criteria: mV: %d STD Single: %d, STD All: %d.\n>>>>',...
                 epochRejmV,epochRejStdSingle,epochRejStdAll)
-            [~,idxmV]=pop_eegthresh(EEG,1,[1:64] ,-epochRejmV,epochRejmV,-2,10.998,2,0);
+            [~,idxmV]=pop_eegthresh(EEG,1,[1:64] ,-epochRejmV,epochRejmV,min(EEG.times)/1000,...
+                max(EEG.times)/1000,2,0);
             EEG = pop_jointprob(EEG,1,[1:64] ,epochRejStdSingle,epochRejStdAll,1,0);
             rejIndex = unique([rejIndex, idxmV, find(EEG.reject.rejjp)]); % update rejection Index.
             EEG = pop_select(EEG,'notrial',rejIndex); % reject epochs.

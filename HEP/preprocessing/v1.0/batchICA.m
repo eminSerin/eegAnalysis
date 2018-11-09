@@ -45,9 +45,9 @@ for i = 1: nfile
     spstr = strsplit(cfile,'_'); 
     cDataName = [spstr{1},'_ica']; % dataname
     if binica 
-        EEG = pop_runica(EEG, 'icatype','binica','extended',1,'interupt','on'); % run binica. 
+        EEG = pop_runica(EEG, 'icatype','binica','extended',1,'chanind',1:64); % run binica. 
     else
-        EEG = pop_runica(EEG, 'extended',1,'interupt','on'); % run ica. 
+        EEG = pop_runica(EEG, 'extended',1,'chanind',1:64); % run ica. 
     end
     
     EEG.setname = cDataName; % change setname with current dataname

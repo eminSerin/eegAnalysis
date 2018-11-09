@@ -74,12 +74,15 @@ if p.Results.ifBase
         case 'db'
             % Decibel baseline
             baseCorr = @(m,mb) 10*log10(m./mb);
+            data.ylabel = 'db';
         case 'rel'
             % Relative relative baseline.
             baseCorr = @(m,mb) (m./mb)-1;
+            data.ylabel = 'relative change';
         case 'abs'
             % absolute baseline
             baseCorr = @(m,mb) m - mb;
+            data.ylabel = '\muV^{2}';
     end
 end
 
