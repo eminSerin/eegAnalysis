@@ -60,8 +60,8 @@ idxFreq = 4; % index of target frequency.
 ifPic = 1; % 1: save topoplots as png file, 0: save as pdf(vector based).
 ind = 'avg'; % ind or avg.
 elSelect = 'posterior';
-datTimeWin = [4000,5000]; % task Time Window
-plotMethod = 'power';
+datTimeWin = [4000,4500]; % task Time Window
+plotMethod = 'topomap';
 ifSave = 1;
 freqs = [1:25];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -339,7 +339,7 @@ end
 %% Save figures.
 if ismember(plotMethod,{'topomap'})
     outputDir = [pwd filesep 'plots_&_datatables' filesep 'plots'...
-        filesep plotMethod filesep elSelect '_'...
+        filesep plotMethod filesep...
         int2str(datTimeWin(1)) '_' int2str(datTimeWin(2)) filesep];
 else
     outputDir = [pwd filesep 'plots_&_datatables' filesep 'plots'...
