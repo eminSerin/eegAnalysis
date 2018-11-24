@@ -32,9 +32,9 @@ end
 
 %% Load behavioral data.
 % Load eeglab set file.
+disp('Please select log files!!!');
 [files, path] = uigetfile('.mat','Please load log files.',...
     'MultiSelect','on');
-disp('Please select log files!!!');
 
 if ischar(files)
     nfile = 1;
@@ -135,8 +135,8 @@ end
 %% TF data.
 
 % Load data.
-[file, path] = uigetfile('.mat','Please load .mat file that includes time frequency data');
 disp('Please select dataset file that includes time frequency data!!!')
+[file, path] = uigetfile('subDataMat_rel.mat','Please load .mat file that includes time frequency data');
 
 % Electrodes
 posterior = [20 21 22 23 24 25 26 27 28 29 30 31 57 58 59 60 61 62 63 64]; % occipital electrodes.
@@ -169,19 +169,24 @@ end
 %% Load and prepare SNR data.
 
 % Ask for data path.
-[file, path] = uigetfile('.mat','Please load .mat file that includes SNR data');
 disp('Please select dataset file that includes snr data!!!')
+[file, path] = uigetfile('subfftSnr.mat','Please load .mat file that includes SNR data');
 
 % Load mat file.
 data = load([path file]);
 fname = fieldnames(data);
 data = data.(fname{:});
+
+% Frequency of interest
+tarFreq = 4; % Frequency to be extracted. 
+tarFreqIdx = find(data.freqs == tarFreq); % index of the target freq. 
+
 for nc = 1:length(conds)
     for part = 1: nSub
         for el = 1: length(elLabels)
             dataTable(part).([conds{nc},'_',elLabels{el},'_SNR'])...
-                = mean(mean(mean(data.(conds{nc}).snr(electrodes{el},:,...
-                find(data.subID(part)==[dataTable.subID])),3),2),1);
+                = mean(mean(data.(conds{nc}).snr(electrodes{el},tarFreqIdx,...
+                find(data.subID(part)==[dataTable.subID])),1),3);
         end
     end
 end

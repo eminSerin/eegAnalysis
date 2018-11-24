@@ -20,8 +20,8 @@ function [] = create_fftSNRmat()
 maxFreq = 30; % maximum frequency
 noisebins = 10; % neighboring bins.
 padbins = 2; % number of closest neighbors.
-freqRes = 1/50; % frequency resolution (1/50 suggested).
-datTimeWin = [3000,10000]; % task Time Window
+datTimeWin = [3000,9998]; % task Time Window
+freqRes = 1/10; % 1/trial time in sec is recommended.
 
 % Load eeglab set file.
 path = uigetdir('Please load .set eeg datafile');
@@ -87,7 +87,7 @@ for nfol = 1 : numel(folders)
         tmp = zeros(size(temp));
         parfor (i = 1:nfreqs,poolsize)
             % Calculate SNR and store it in the structure
-            tmp(:, i, :) = mean(temp(:, stimband(i,:), :), 2)./...
+            tmp(:, i, :) = temp(:, stimband(i,:), :) ./...
                 mean(temp(:, noiseband(i,:), :), 2);
         end
         % Make the beginning and end NaNs because they don't have any neighbours

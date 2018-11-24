@@ -58,10 +58,10 @@ addParameter(p,'datTimeWin',defaultVals.datTimeWin,validationNumeric);
 % delete this section to make input parsing functional. 
 idxFreq = 4; % index of target frequency.
 ifPic = 1; % 1: save topoplots as png file, 0: save as pdf(vector based).
-ind = 'ind'; % ind or avg.
-elSelect = 'anterior';
+ind = 'avg'; % ind or avg.
+elSelect = 'posterior';
 datTimeWin = [4000,5000]; % task Time Window
-plotMethod = 'snr';
+plotMethod = 'power';
 ifSave = 1;
 freqs = [1:25];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -243,7 +243,7 @@ switch plotMethod
                     for i = 1 : numel(identity)
                         % Plot time series.
                         hl(i) = line(data.times,mean(data.([cond{c},...
-                            identity{i}])(:,:,idxFreq,part),1),'Color',cmap(i,:));
+                            identity{i}])(electrodes,:,idxFreq,part),1),'Color',cmap(i,:));
                     end
                     xlim([0 10000])
                     if rtOverlay && strcmpi(cond{c},'exp')
