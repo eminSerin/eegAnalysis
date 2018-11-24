@@ -16,6 +16,7 @@ function [] = bypass_channel(varargin)
 %
 %   Emin Serin - Berlin School of Mind and Brain
 %
+%
 %% Input parser
 if nargin < 1
     % Set external and internal electrodes if no specific given. 
